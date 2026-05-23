@@ -113,8 +113,21 @@ export const api = {
 }
 
 export function createEventSocket(onEvent: (event: AgentEvent) => void, wsUrl?: string): WebSocket {
-  const protocol = window.location.protocol === 'https:' ? 'wss' : 'ws'
-  const url = wsUrl ?? `${protocol}://${window.location.hostname}:8000/ws/events`
+  let url: string
+  if (wsUrl) {
+    // Caller-supplied override
+    url = wsUrl
+  } else if (process.env.NEXT_PUBLIC_WS_URL) {
+    // Full WebSocket URL supplied explicitly, e.g. wss://api.onrender.com/ws/events
+    url = process.env.NEXT_PUBLIC_WS_URL
+  } else if (process.env.NEXT_PUBLIC_API_HOST) {
+    // Render fromService injects the bare API hostname; build the wss:// URL from it
+    url = `wss://${process.env.NEXT_PUBLIC_API_HOST}/ws/events`
+  } else {
+    // Local dev: connect directly to the API on port 8000
+    const protocol = window.location.protocol === 'https:' ? 'wss' : 'ws'
+    url = `${protocol}://${window.location.hostname}:8000/ws/events`
+  }
   const socket = new WebSocket(url)
   socket.onmessage = (message) => {
     try {

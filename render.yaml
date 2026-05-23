@@ -1,0 +1,82 @@
+# render.yaml — AgentWatch Render Blueprint
+#
+# DEPLOY STEPS:
+#   1. Push this repo to GitHub (already done)
+#   2. dashboard.render.com → New → Blueprint
+#   3. Connect the sreerevanth/AgentWatch repo
+#   4. Render reads this file and creates all services automatically
+#   5. Click "Apply" — both services + postgres + redis spin up
+#
+# Free tier note: web services spin down after 15 min of inactivity.
+# Upgrade to Starter ($7/mo each) for always-on.
+
+databases:
+  - name: agentwatch-db
+    databaseName: agentwatch
+    user: agentwatch
+    plan: free
+    region: oregon
+
+services:
+  # ── Redis ─────────────────────────────────────────────────────────
+  - type: redis
+    name: agentwatch-redis
+    plan: free
+    maxmemoryPolicy: noeviction
+    ipAllowList: []
+
+  # ── FastAPI backend ────────────────────────────────────────────────
+  - type: web
+    name: agentwatch-api
+    runtime: docker
+    dockerfilePath: ./Dockerfile.api
+    dockerContext: .
+    plan: free
+    region: oregon
+    healthCheckPath: /health
+    envVars:
+      - key: DATABASE_URL
+        fromDatabase:
+          name: agentwatch-db
+          property: connectionString
+      - key: REDIS_URL
+        fromService:
+          type: redis
+          name: agentwatch-redis
+          property: connectionString
+      - key: CELERY_BROKER_URL
+        fromService:
+          type: redis
+          name: agentwatch-redis
+          property: connectionString
+      - key: AGENTWATCH_ENV
+        value: production
+      # Optional: set SLACK_WEBHOOK_URL here to enable safety alerts
+      # - key: SLACK_WEBHOOK_URL
+      #   value: https://hooks.slack.com/services/...
+
+  # ── Next.js dashboard ─────────────────────────────────────────────
+  - type: web
+    name: agentwatch-frontend
+    runtime: docker
+    dockerfilePath: ./frontend/Dockerfile
+    dockerContext: ./frontend
+    plan: free
+    region: oregon
+    envVars:
+      # Render injects the API service's public hostname (no protocol).
+      # next.config.js normalises it to https:// automatically.
+      - key: AGENTWATCH_API_URL
+        fromService:
+          type: web
+          name: agentwatch-api
+          property: host
+      # Used by the browser to open the WebSocket connection.
+      # lib/api.ts prepends wss:// automatically.
+      - key: NEXT_PUBLIC_API_HOST
+        fromService:
+          type: web
+          name: agentwatch-api
+          property: host
+      - key: NODE_ENV
+        value: production

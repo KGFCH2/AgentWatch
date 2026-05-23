@@ -23,4 +23,4 @@ frontend/.next/
 Thumbs.db
 
 # Docker
-*.log
+*.log.env.local
