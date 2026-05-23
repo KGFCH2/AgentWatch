@@ -64,19 +64,9 @@ services:
     plan: free
     region: oregon
     envVars:
-      # Render injects the API service's public hostname (no protocol).
-      # next.config.js normalises it to https:// automatically.
       - key: AGENTWATCH_API_URL
-        fromService:
-          type: web
-          name: agentwatch-api
-          property: host
-      # Used by the browser to open the WebSocket connection.
-      # lib/api.ts prepends wss:// automatically.
+        value: https://agentwatch-api-zefd.onrender.com
       - key: NEXT_PUBLIC_API_HOST
-        fromService:
-          type: web
-          name: agentwatch-api
-          property: host
+        value: agentwatch-api-zefd.onrender.com
       - key: NODE_ENV
         value: production
