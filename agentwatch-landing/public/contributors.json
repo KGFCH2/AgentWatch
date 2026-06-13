@@ -49,15 +49,15 @@
       "contributions": 3
     },
     {
-      "login": "harika880",
-      "avatar_url": "https://github.com/harika880.png",
-      "html_url": "https://github.com/harika880",
-      "contributions": 2
-    },
-    {
       "login": "SakethSumanBathini",
       "avatar_url": "https://github.com/SakethSumanBathini.png",
       "html_url": "https://github.com/SakethSumanBathini",
+      "contributions": 2
+    },
+    {
+      "login": "harika880",
+      "avatar_url": "https://github.com/harika880.png",
+      "html_url": "https://github.com/harika880",
       "contributions": 2
     },
     {
@@ -133,6 +133,6 @@
       "contributions": 1
     }
   ],
-  "updated_at": "2026-06-12T22:07:30Z",
+  "updated_at": "2026-06-13T03:55:32Z",
   "total": 22
 }
